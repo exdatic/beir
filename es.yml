@@ -7,7 +7,7 @@ services:
     environment:
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g -Dlog4j2.formatMsgNoLookups=true"
       - bootstrap.memory_lock=true
-      - discovery.type: single-node
+      - discovery.type=single-node
       - node.name=es.1
       - xpack.security.enabled=false
     ulimits:
