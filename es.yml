@@ -24,7 +24,7 @@ services:
         # expose under /es
         - traefik.http.routers.elasticsearch.rule=PathPrefix(`/es`)
         # order of middlewares is relevant
-        - traefik.http.routers.elasticsearch.middlewares=es-stripprefix,admin-auth
+        - traefik.http.routers.elasticsearch.middlewares=es-stripprefix #,admin-auth
         # https redirect
         - traefik.http.routers.elasticsearch-http.rule=PathPrefix(`/es`)
         - traefik.http.routers.elasticsearch-http.entrypoints=http
