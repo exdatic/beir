@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.3
+    hostname: es.1
+    environment:
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g -Dlog4j2.formatMsgNoLookups=true"
+      - bootstrap.memory_lock=true
+      - discovery.type: single-node
+      - node.name=es.1
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.middlewares.es-stripprefix.stripprefix.prefixes=/es
+        - traefik.http.routers.elasticsearch.entrypoints=https
+        # letsencrypt
+        - traefik.http.routers.elasticsearch.tls.certresolver=le
+        # expose under /es
+        - traefik.http.routers.elasticsearch.rule=PathPrefix(`/es`)
+        # order of middlewares is relevant
+        - traefik.http.routers.elasticsearch.middlewares=es-stripprefix,admin-auth
+        # https redirect
+        - traefik.http.routers.elasticsearch-http.rule=PathPrefix(`/es`)
+        - traefik.http.routers.elasticsearch-http.entrypoints=http
+        - traefik.http.routers.elasticsearch-http.middlewares=https-redirect
+        # in swarmmode traefik doesn't discover ports automatically
+        - traefik.http.services.elasticsearch.loadbalancer.server.port=9200
+      resources:
+        limits:
+          memory: 8G
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - public
+volumes:
+  elasticsearch-data:
+networks:
+  public:
+    external: true
